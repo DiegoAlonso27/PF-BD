@@ -1,0 +1,18 @@
+* Diario:
+    - Realice una copia de seguridad de la base de datos.
+    - Ejecute un escaneo de índice para identificar y reparar cualquier índice roto.
+    - Ejecute un análisis de datos para identificar y reparar cualquier datos corruptos.
+
+* Semanal:
+    - Realice una copia de seguridad diferencial de la base de datos.
+    - Optimice las tablas para mejorar el rendimiento.
+    - Realice una copia de seguridad de los registros de error.
+
+* Mensual:
+    - Realice una copia de seguridad completa de la base de datos.
+    - Realice una recuperación de prueba de la copia de seguridad completa para asegurarse de que sea recuperable.
+    - Realice una copia de seguridad de las estadísticas de la base de datos.
+
+* Anual:
+    - Realice una copia de seguridad de la base de datos y elucídala.
+    - Realice una restauración de prueba de la copia de seguridad de la base de datos para asegurarse de que sea recuperable.
