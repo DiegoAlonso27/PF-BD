@@ -1,9 +1,12 @@
+USE gym_attendance;
+GO
+
 CREATE PROCEDURE create_attendance(
     @client_id INT,
     @user_id INT,
     @date_attendance DATETIME2,
     @type_assistances INT,
-    @valid BOOLEAN
+    @valid BIT
 ) AS BEGIN
 INSERT INTO
     attendance (
@@ -29,8 +32,9 @@ VALUES
     );
 
 -- Call sp_log_error() if an error occurs
-IF @ @ERROR > 0 BEGIN sp_log_error('create_attendance', ERROR_MESSAGE());
-
-END;
+    IF @@ERROR > 0
+    BEGIN
+        EXEC sp_log_error 'create_attendance', ERROR_MESSAGE;
+    END;
 
 END;

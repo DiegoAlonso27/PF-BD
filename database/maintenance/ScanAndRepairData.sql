@@ -1,3 +1,6 @@
+USE gym_attendance;
+GO
+
 CREATE PROCEDURE dbo.ScanAndRepairData AS BEGIN
 SET
     NOCOUNT ON;
@@ -63,6 +66,12 @@ END;
 PRINT 'Total rows affected: ' + CONVERT(VARCHAR(10), @row_count);
 
 PRINT 'Total bytes processed: ' + CONVERT(VARCHAR(10), @bytes_processed);
+
+-- Call sp_log_error() if an error occurs
+    IF @@ERROR > 0
+    BEGIN
+        EXEC sp_log_error 'ScanAndRepairData', ERROR_MESSAGE;
+    END;
 
 END
 GO

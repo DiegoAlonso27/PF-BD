@@ -1,3 +1,6 @@
+USE gym_attendance;
+GO
+
 CREATE PROCEDURE create_type_membership(
     @name VARCHAR(255),
     @length INT,
@@ -23,8 +26,9 @@ VALUES
     );
 
 -- Call sp_log_error() if an error occurs
-IF @ @ERROR > 0 BEGIN sp_log_error('create_type_membership', ERROR_MESSAGE());
-
-END;
+    IF @@ERROR > 0
+    BEGIN
+        EXEC sp_log_error 'create_type_membership', ERROR_MESSAGE;
+    END;
 
 END;

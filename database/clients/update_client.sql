@@ -1,3 +1,6 @@
+USE gym_attendance;
+GO
+
 CREATE PROCEDURE update_client(
     @id INT,
     @name VARCHAR(255),
@@ -16,11 +19,12 @@ SET
     date_of_birth = @date_of_birth,
     updated_at = CURRENT_TIMESTAMP
 WHERE
-    id = @id;
+    client_id = @id;
 
 -- Call sp_log_error() if an error occurs
-IF @ @ERROR > 0 BEGIN sp_log_error('update_client', ERROR_MESSAGE());
-
-END;
+IF @@ERROR > 0
+    BEGIN
+        EXEC sp_log_error 'update_client', ERROR_MESSAGE;
+    END;
 
 END;

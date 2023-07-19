@@ -1,3 +1,6 @@
+USE gym_attendance;
+GO
+
 CREATE PROCEDURE update_membership(
     @id INT,
     @client_id INT,
@@ -16,11 +19,12 @@ SET
     price = @price,
     updated_at = CURRENT_TIMESTAMP
 WHERE
-    id = @id;
+    membership_id = @id;
 
 -- Call sp_log_error() if an error occurs
-IF @ @ERROR > 0 BEGIN sp_log_error('update_membership', ERROR_MESSAGE());
-
-END;
+    IF @@ERROR > 0
+    BEGIN
+        EXEC sp_log_error 'update_membership', ERROR_MESSAGE;
+    END;
 
 END;

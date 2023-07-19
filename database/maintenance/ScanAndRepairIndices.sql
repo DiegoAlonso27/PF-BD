@@ -1,94 +1,104 @@
-CREATE PROCEDURE dbo.ScanAndRepairIndices AS BEGIN
-SET
-    NOCOUNT ON;
+USE gym_attendance;
+GO
 
-DECLARE @table_name sysname;
+CREATE PROCEDURE dbo.ScanAndRepairIndexes
+AS
+BEGIN
+    SET NOCOUNT ON;
 
-DECLARE @index_name sysname;
+    DECLARE @TableName NVARCHAR(255);
+    DECLARE @IndexName NVARCHAR(255);
+    DECLARE @SQL NVARCHAR(MAX);
 
-DECLARE @index_id int;
+    -- Cursor to iterate over all user tables
+    DECLARE IndexCursor CURSOR FOR
+    SELECT 
+        t.name AS TableName,
+        i.name AS IndexName
+    FROM 
+        sys.indexes AS i
+    INNER JOIN 
+        sys.tables AS t ON t.object_id = i.object_id
+    WHERE 
+        i.index_id > 0 AND
+        i.is_disabled = 0 AND
+        i.is_hypothetical = 0 AND
+        i.type_desc <> 'HEAP' AND
+        t.is_ms_shipped = 0;
 
-DECLARE @index_type sysname;
+    -- Variables to store index repair statements
+    DECLARE @RebuildIndexSQL NVARCHAR(MAX);
+    DECLARE @ReorganizeIndexSQL NVARCHAR(MAX);
 
-DECLARE @index_state int;
-
-DECLARE @index_type_desc sysname;
-
-DECLARE @index_state_desc sysname;
-
-DECLARE @rows_affected int;
-
-DECLARE @bytes_processed bigint;
-
-SELECT
-    @table_name = name
-FROM
-    sys.tables
-WHERE
-    database_id = DB_ID('gym_attendance');
-
-SELECT
-    @index_name = name,
-    @index_id = object_id,
-    @index_type = type_desc,
-    @index_state = state_desc
-FROM
-    sys.indexes
-WHERE
-    object_id IN (
-        SELECT
-            object_id
-        FROM
-            sys.tables
-        WHERE
-            database_id = DB_ID('gym_attendance')
+    -- Temporary table to store index fragmentation information
+    CREATE TABLE #IndexFragmentation
+    (
+        TableName NVARCHAR(255),
+        IndexName NVARCHAR(255),
+        Fragmentation DECIMAL(18,2),
+        IndexType NVARCHAR(60)
     );
 
-SELECT
-    @index_type_desc = CASE
-        @index_type
-        WHEN 'CLUSTERED' THEN 'Clustered Index'
-        WHEN 'NONCLUSTERED' THEN 'Nonclustered Index'
-    END;
+    OPEN IndexCursor;
 
-SELECT
-    @index_state_desc = CASE
-        @index_state
-        WHEN 0 THEN 'Healthy'
-        WHEN 1 THEN 'Degraded'
-        WHEN 2 THEN 'Suspected'
-        WHEN 3 THEN 'Broken'
-    END;
+    -- Fetch the first index
+    FETCH NEXT FROM IndexCursor INTO @TableName, @IndexName;
 
-SELECT
-    @rows_affected = 0,
-    @bytes_processed = 0;
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        -- Determine index fragmentation and index type
+        SET @SQL = N'
+            INSERT INTO #IndexFragmentation (TableName, IndexName, Fragmentation, IndexType)
+            SELECT
+                OBJECT_NAME(i.object_id) AS TableName,
+                i.name AS IndexName,
+                ISNULL(dps.avg_fragmentation_in_percent, 0) AS Fragmentation,
+                i.type_desc AS IndexType
+            FROM
+                sys.dm_db_index_physical_stats(DB_ID(), NULL, NULL, NULL, ''LIMITED'') dps
+            INNER JOIN
+                sys.indexes i ON dps.object_id = i.object_id AND dps.index_id = i.index_id
+            INNER JOIN
+                sys.tables t ON t.object_id = i.object_id
+            WHERE
+                t.name = @TableName AND
+                i.name = @IndexName;
+        ';
 
-WHILE @index_name IS NOT NULL BEGIN IF @index_state = 3 BEGIN BEGIN TRY ALTER INDEX ALL ON @table_name REBUILD;
+        EXEC sp_executesql @SQL, N'@TableName NVARCHAR(255), @IndexName NVARCHAR(255)', @TableName, @IndexName;
 
-END TRY BEGIN CATCH PRINT 'Error rebuilding index ' + @index_name;
+        -- Determine the repair action based on index fragmentation
+        SET @RebuildIndexSQL = N'ALTER INDEX ' + QUOTENAME(@IndexName) + N' ON ' + QUOTENAME(@TableName) + N' REBUILD;';
+        SET @ReorganizeIndexSQL = N'ALTER INDEX ' + QUOTENAME(@IndexName) + N' ON ' + QUOTENAME(@TableName) + N' REORGANIZE;';
 
-END CATCH;
+        IF EXISTS (
+            SELECT 1
+            FROM #IndexFragmentation
+            WHERE TableName = @TableName AND IndexName = @IndexName AND Fragmentation > 30
+        )
+        BEGIN
+            -- Index fragmentation is greater than 30%, rebuild index
+            PRINT N'Rebuilding index ' + QUOTENAME(@IndexName) + N' on table ' + QUOTENAME(@TableName) + N'...';
+            EXEC sp_executesql @RebuildIndexSQL;
+        END
+        ELSE IF EXISTS (
+            SELECT 1
+            FROM #IndexFragmentation
+            WHERE TableName = @TableName AND IndexName = @IndexName AND Fragmentation > 10
+        )
+        BEGIN
+            -- Index fragmentation is greater than 10%, reorganize index
+            PRINT N'Reorganizing index ' + QUOTENAME(@IndexName) + N' on table ' + QUOTENAME(@TableName) + N'...';
+            EXEC sp_executesql @ReorganizeIndexSQL;
+        END
 
+        -- Fetch the next index
+        FETCH NEXT FROM IndexCursor INTO @TableName, @IndexName;
+    END
+
+    CLOSE IndexCursor;
+    DEALLOCATE IndexCursor;
+
+    -- Drop the temporary table
+    DROP TABLE #IndexFragmentation;
 END;
-
-SELECT
-    @rows_affected = @rows_affected + rows_affected,
-    @bytes_processed = @bytes_processed + bytes_processed
-FROM
-    sys.dm_db_index_usage_stats
-WHERE
-    object_id = @table_name
-    AND index_id = @index_id;
-
-SELECT
-    @index_name = NULL;
-
-END;
-
-PRINT 'Total rows affected: ' + CONVERT(VARCHAR(10), @rows_affected);
-
-PRINT 'Total bytes processed: ' + CONVERT(VARCHAR(10), @bytes_processed);
-
-END
-GO

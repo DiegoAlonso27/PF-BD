@@ -1,10 +1,13 @@
+USE gym_attendance;
+GO
+
 CREATE PROCEDURE update_attendance(
     @id INT,
     @client_id INT,
     @user_id INT,
     @date_attendance DATETIME2,
     @type_assistances INT,
-    @valid BOOLEAN
+    @valid BIT
 ) AS BEGIN
 UPDATE
     attendance
@@ -16,11 +19,12 @@ SET
     valid = @valid,
     updated_at = CURRENT_TIMESTAMP
 WHERE
-    id = @id;
+    attendance_id = @id;
 
 -- Call sp_log_error() if an error occurs
-IF @ @ERROR > 0 BEGIN sp_log_error('update_attendance', ERROR_MESSAGE());
-
-END;
+    IF @@ERROR > 0
+    BEGIN
+        EXEC sp_log_error 'update_attendance', ERROR_MESSAGE;
+    END;
 
 END;

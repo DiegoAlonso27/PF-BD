@@ -1,9 +1,12 @@
+USE gym_attendance;
+GO
+
 CREATE PROCEDURE get_membership_by_id(@id INT) AS BEGIN
 SELECT
     *
 FROM
     memberships
 WHERE
-    id = @id;
+    membership_id = @id;
 
 END;

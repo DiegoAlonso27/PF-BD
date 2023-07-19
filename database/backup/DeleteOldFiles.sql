@@ -1,29 +1,33 @@
-CREATE PROCEDURE dbo.DeleteOldFiles
+USE gym_attendance;
+GO
+
+CREATE PROCEDURE dbo.DeleteOldBackupFiles
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    DECLARE @path NVARCHAR(255) = N'D:\BACKUP\';
+    DECLARE @FilePath NVARCHAR(255);
+    DECLARE @FilePattern NVARCHAR(255);
+    DECLARE @OlderThanDate DATETIME;
 
-    DECLARE @filelist TABLE (
-        filename NVARCHAR(255)
-    );
+    -- Set the file path and file pattern
+    SET @FilePath = N'D:\BACKUP\';
+    SET @FilePattern = N'*.*';
 
-    INSERT INTO @filelist (filename)
-    SELECT filename
-    FROM master..sysfiles
-    WHERE filename LIKE N'%.bak'
-    AND datediff(day, getdate(), lastwritetime) > 3;
+    -- Calculate the date 3 days ago
+    SET @OlderThanDate = DATEADD(DAY, -3, GETDATE());
 
-    DECLARE @count INT = 0;
+    -- Delete old backup files
+    DECLARE @DeleteSQL NVARCHAR(MAX);
+    SET @DeleteSQL = N'
+        EXEC xp_cmdshell ''del "' + @FilePath + @FilePattern + N'" /Q'''
+        + N' WHERE CREATE_DATE < ''' + CONVERT(NVARCHAR(30), @OlderThanDate, 120) + N'''';
 
-    SELECT @count = @count + 1
-    FROM @filelist;
+    EXEC sp_executesql @DeleteSQL;
 
-    IF @count > 0
+    -- Call sp_log_error() if an error occurs
+    IF @@ERROR > 0
     BEGIN
-        DELETE FROM master..sysfiles
-        WHERE filename IN (SELECT filename FROM @filelist);
+        EXEC sp_log_error 'DeleteOldBackupFiles', ERROR_MESSAGE;
     END;
-END
-GO
+END;

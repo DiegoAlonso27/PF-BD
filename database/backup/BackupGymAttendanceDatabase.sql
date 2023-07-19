@@ -1,3 +1,6 @@
+USE gym_attendance;
+GO
+
 CREATE PROCEDURE dbo.BackupGymAttendanceDatabase AS BEGIN
 SET
     NOCOUNT ON;

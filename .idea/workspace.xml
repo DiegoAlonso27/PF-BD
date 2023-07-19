@@ -2,13 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7f98a866-7816-44d6-8356-09678cdfcbd0" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/PF-BD.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/mssql_jdbc_12_2_0_jre81.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mssql-jdbc-12.2.0.jre8.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/mssql_jdbc_12_2_0_jre8.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PF-BD.iml" beforeDir="false" afterPath="$PROJECT_DIR$/PF-BD.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/database/ConnectionBD.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/database/ConnectionBD.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,8 +30,9 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "D:/DIEGO INFO/PROYECTOS PERSONALES/UTP/BASE DE DATOS/mssql-jdbc-12.2.0.jre8.jar",
+    "last_opened_file_path": "D:/UTP/SICLO 4/BBDD/PF-BD/mssql-jdbc-12.2.0.jre8.jar",
     "project.structure.last.edited": "Libraries",
     "project.structure.proportion": "0.0",
     "project.structure.side.proportion": "0.0"
@@ -48,6 +48,7 @@
       <updated>1689776537658</updated>
       <workItem from="1689776540107" duration="193000" />
       <workItem from="1689784261448" duration="2429000" />
+      <workItem from="1689799739088" duration="877000" />
     </task>
     <servers />
   </component>
