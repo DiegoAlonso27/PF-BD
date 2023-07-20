@@ -9,8 +9,8 @@ CREATE PROCEDURE create_user
 )
 AS
 BEGIN
-    INSERT INTO users (name, email, password, password_hash)
-    VALUES (@name, @email, @password, HASHBYTES('SHA2_256', @password));
+   INSERT INTO users (name, email, password, password_hash, phone_number)
+    VALUES (@name, @email, @password, HASHBYTES('SHA2_256', @password), '0000000000');
     
     -- Call sp_log_error() if an error occurs
     IF @@ERROR > 0
