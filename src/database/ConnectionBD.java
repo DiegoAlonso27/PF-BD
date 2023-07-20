@@ -7,7 +7,7 @@ import java.sql.Statement;
 public class ConnectionBD {
 
     public static Connection getConeConnection() {
-        String url = "jdbc:sqlserver://localhost:1433;database=master;user=sa;password=1903751421;loginTimeout=30;TrustServerCertificate=True;";
+        String url = "jdbc:sqlserver://localhost:1433;database=gym_attendance;user=sa;password=1903751421;loginTimeout=30;TrustServerCertificate=True;";
 
         try {
             Connection con = java.sql.DriverManager.getConnection(url);
